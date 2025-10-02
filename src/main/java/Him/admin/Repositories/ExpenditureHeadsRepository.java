@@ -1,7 +1,9 @@
 package Him.admin.Repositories;
 
+import Him.admin.Models.Expenditure;
 import Him.admin.Models.ExpenditureHead;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ExpenditureHeadRepository extends JpaRepository<ExpenditureHead,Long> {
+public interface ExpenditureHeadsRepository extends JpaRepository<ExpenditureHead, Long> {
+
 }

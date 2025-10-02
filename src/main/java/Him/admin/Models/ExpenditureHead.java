@@ -32,6 +32,12 @@ public class ExpenditureHead {
     @Size(max = 255)
     private String description;
 
+    // Corrected (One Branch <-> Many ExpenditureHeads)
+    @ManyToOne
+    @NotNull // Keeps the constraint that a branch must be assigned
+    @JoinColumn(name = "branch_id", nullable = false) // Good practice to define the column name
+    private Branch branch;
+
     // Relations
     @OneToMany(mappedBy = "expenditureHead", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Expenditure> expenditures;

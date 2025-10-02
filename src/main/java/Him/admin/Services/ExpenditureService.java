@@ -5,7 +5,7 @@ import Him.admin.Models.Expenditure;
 import Him.admin.Models.ExpenditureHead;
 import Him.admin.Models.User;
 import Him.admin.Repositories.BranchRepository;
-import Him.admin.Repositories.ExpenditureHeadRepository;
+import Him.admin.Repositories.ExpenditureHeadsRepository;
 import Him.admin.Repositories.ExpenditureRepository;
 import Him.admin.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,14 +22,14 @@ public class ExpenditureService {
 
     private final ExpenditureRepository expenditureRepository;
     private final BranchRepository branchRepository;
-    private final ExpenditureHeadRepository expenditureHeadRepository;
+    private final ExpenditureHeadsRepository  expenditureHeadsRepository;
     private final UserRepository userRepository;
 
     public Expenditure createExpenditure(String description, Double amount, LocalDate date, Long branchId, Long expenditurHeadID, Long UserId) {
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new RuntimeException("Branch not found"));
 
-        ExpenditureHead expenditureHead = expenditureHeadRepository.findById(expenditurHeadID).orElseThrow(
+        ExpenditureHead expenditureHead = expenditureHeadsRepository.findById(expenditurHeadID).orElseThrow(
                 () -> new RuntimeException("expenditure head not found")
         );
 

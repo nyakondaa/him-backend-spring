@@ -21,7 +21,7 @@ public class DataSeeder {
             PermissionRepository permissionRepository,
             UserRepository userRepository,
             RevenueHeadRepository revenueHeadRepository,
-            ExpenditureHeadRepository expenditureHeadRepository,
+            ExpenditureHeadsRepository expenditureHeadsRepository,
             PaymentMethodRepository paymentMethodRepository,
 
             TransactionRepository transactionRepository,
@@ -104,9 +104,9 @@ public class DataSeeder {
             revenueHeadRepository.saveAll(Set.of(tithes, offerings));
 
             // ===== 6️⃣ Expenditure Heads =====
-            ExpenditureHead salaries = ExpenditureHead.builder().name("Salaries").code("HO101").description("Staff salaries").build();
-            ExpenditureHead utilities = ExpenditureHead.builder().name("Utilities").code("HO102").description("Electricity, water, internet").build();
-            expenditureHeadRepository.saveAll(Set.of(salaries, utilities));
+            ExpenditureHead salaries = ExpenditureHead.builder().name("Salaries").code("HO101").description("Staff salaries").branch(branch1).build();
+            ExpenditureHead utilities = ExpenditureHead.builder().name("Utilities").code("HO102").description("Electricity, water, internet").branch(branch2).build();
+            expenditureHeadsRepository.saveAll(Set.of(salaries, utilities));
 
             // ===== 7️⃣ Payment Methods =====
             PaymentMethod cash = PaymentMethod.builder().name("Cash").build();
