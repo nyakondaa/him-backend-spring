@@ -1,4 +1,4 @@
-package Him.admin.DTO;
+package Him.admin.DTO.Users;
 
 import lombok.*;
 

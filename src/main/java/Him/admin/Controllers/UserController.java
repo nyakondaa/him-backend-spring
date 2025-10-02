@@ -1,8 +1,8 @@
 package Him.admin.Controllers;
 
-import Him.admin.DTO.UserRequestDTO;
-import Him.admin.DTO.LoginRequestDTO;
-import Him.admin.DTO.UserResponseDTO;
+import Him.admin.DTO.Users.UserRequestDTO;
+import Him.admin.DTO.Users.LoginRequestDTO;
+import Him.admin.DTO.Users.UserResponseDTO;
 import Him.admin.Models.Role;
 import Him.admin.Models.User;
 import Him.admin.Services.UserService;

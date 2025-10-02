@@ -23,6 +23,7 @@ public class SecurityConfig {
                     .authorizeHttpRequests(auth -> auth
                             .requestMatchers("/api/users/**").permitAll()
                             .requestMatchers("/api/login/**").permitAll()// ✅ allow user creation
+                            .requestMatchers("/api/branches/**").permitAll() //for development and testing with postman only
                             .anyRequest().authenticated()
                     );
 

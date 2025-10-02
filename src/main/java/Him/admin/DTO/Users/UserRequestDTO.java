@@ -1,4 +1,4 @@
-package Him.admin.DTO;
+package Him.admin.DTO.Users;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,7 +1,5 @@
 package Him.admin.Services;
-
-
-import Him.admin.DTO.UserRequestDTO;
+import Him.admin.DTO.Users.UserRequestDTO;
 import Him.admin.Exceptions.ResourceAlreadyExistsException;
 import Him.admin.Exceptions.ResourceNotFoundException;
 import Him.admin.Models.Branch;
@@ -15,7 +13,6 @@ import org.slf4j.Logger;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.slf4j.LoggerFactory;
-
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -36,12 +33,6 @@ public class UserService {
     public Optional<User> findByUsername(String username) {
         return Optional.ofNullable(userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User not found")));
     }
-
-
-
-
-
-
     // Create a new user
     public User createUser(String username, String rawPassword, String email, String firstName, String lastName, Long branchID,Set<String> roleNames) {
 
