@@ -1,5 +1,7 @@
 package Him.admin.DTO.Ependitures;
 
+import jdk.jshell.Snippet;
+
 import java.time.LocalDate;
 
 public record ExpenditureResponseDTO(
@@ -7,6 +9,8 @@ public record ExpenditureResponseDTO(
          String description,
          Double amount,
          LocalDate date,
-         String branchName
+         String branchName,
+         String expnditureHeadName
 ) {
+
 }

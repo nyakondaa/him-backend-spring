@@ -24,6 +24,7 @@ public class SecurityConfig {
                             .requestMatchers("/api/users/**").permitAll()
                             .requestMatchers("/api/login/**").permitAll()// ✅ allow user creation
                             .requestMatchers("/api/branches/**").permitAll() //for development and testing with postman only
+                            .requestMatchers("/api/expenditures/**").permitAll()
                             .anyRequest().authenticated()
                     );
 
