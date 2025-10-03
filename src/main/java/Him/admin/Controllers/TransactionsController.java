@@ -37,9 +37,6 @@ public class TransactionsController {
                 transaction.getBranch().getBranchName(),
                 transaction.getProcessedBy().getUsername()
 
-
-
-
         );
 
         return ResponseEntity.ok().body(responseDTO);

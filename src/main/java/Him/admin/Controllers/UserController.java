@@ -9,6 +9,7 @@ import Him.admin.Services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -24,6 +25,7 @@ public class UserController {
 
     // 1️⃣ Create user
     @PostMapping
+    @PreAuthorize("hasAuthority('users:create')")
     public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserRequestDTO dto) {
         User user = userService.createUser(
                 dto.getUsername(),
@@ -124,23 +126,6 @@ public class UserController {
         return ResponseEntity.ok("User unlocked");
     }
 
-    // 8️⃣ Check permission
-    @GetMapping("/{id}/permission")
-    public ResponseEntity<Boolean> hasPermission(
-            @PathVariable Long id,
-            @RequestParam String module,
-            @RequestParam String action
-    ) {
-        return userService.findById(id)
-                .map(user -> ResponseEntity.ok(userService.hasPermission(user, module, action)))
-                .orElse(ResponseEntity.notFound().build());
-    }
+    
 
-    // 9️⃣ Login
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequestDTO dto) {
-        boolean success = userService.authenticate(dto.getUsername(), dto.getPassword());
-        if (success) return ResponseEntity.ok("Login successful");
-        return ResponseEntity.status(401).body("Invalid credentials or account locked");
-    }
 }

@@ -2,9 +2,13 @@
 package Him.admin.Models;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.security.Permissions;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -13,7 +17,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,12 +62,42 @@ public class User {
     )
     private Set<Role> roles; // supports multiple roles per user
 
-    // Convenience method to check if user has a specific permission
-    public boolean hasPermission(String module, String action) {
-        if (roles == null) return false;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Convert roles & permissions to Spring Security authorities
+        if (roles == null) return List.of();
         return roles.stream()
-                .anyMatch(role -> role.getPermissions().stream()
-                        .anyMatch(p -> p.getModule().equalsIgnoreCase(module)
-                                && p.getAction().equalsIgnoreCase(action)));
+                .flatMap(role -> role.getPermissions().stream())
+                .map(permission -> new SimpleGrantedAuthority(permission.getModule() + ":" + permission.getAction()))
+                .toList();
     }
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // or implement logic if you want
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !this.locked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+
+
 }

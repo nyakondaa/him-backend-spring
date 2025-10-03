@@ -92,9 +92,6 @@ public class UserService {
     }
 
     // Check if user has permission
-    public boolean hasPermission(User user, String module, String action) {
-        return user.hasPermission(module, action);
-    }
 
     // Increment failed login attempts
     public void incrementFailedLogin(User user) {
