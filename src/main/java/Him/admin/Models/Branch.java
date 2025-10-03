@@ -43,10 +43,12 @@ public class Branch {
     private String branchCode;
 
     // Relations
-
     @OneToMany(mappedBy = "branch", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<User> users;
 
     @OneToMany(mappedBy = "branch", cascade = CascadeType.ALL, orphanRemoval = true)
     private  Set<ExpenditureHead>  expenditureHeads;
+
+    @OneToMany (mappedBy = "branch", cascade = CascadeType.ALL, orphanRemoval = true) //one branch head can have  many revenueHeads
+    private Set<RevenueHeads>  revenueHeads;
 }

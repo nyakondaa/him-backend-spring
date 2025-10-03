@@ -26,6 +26,7 @@ public class SecurityConfig {
                             .requestMatchers("/api/branches/**").permitAll() //for development and testing with postman only
                             .requestMatchers("/api/expenditures/**").permitAll()
                             .requestMatchers("/api/expenditureheads/**").permitAll()
+                            .requestMatchers("/api/revenueheads/**").permitAll()
                             .anyRequest().authenticated()
                     );
 

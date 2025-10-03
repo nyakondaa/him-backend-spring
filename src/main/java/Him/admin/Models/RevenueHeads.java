@@ -35,4 +35,9 @@ public class RevenueHeads {
     // Relations
     @OneToMany(mappedBy = "revenueHead", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Transaction> transactions;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
 }
