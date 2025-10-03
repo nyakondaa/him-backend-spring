@@ -20,6 +20,10 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
+    @Column(unique = true)
+    private String rrn;
+
     @NotNull
     @DecimalMin("0.0")
     private BigDecimal amount;

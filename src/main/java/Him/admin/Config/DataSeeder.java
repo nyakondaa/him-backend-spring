@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,7 +25,7 @@ public class DataSeeder {
             ExpenditureHeadsRepository expenditureHeadsRepository,
             PaymentMethodRepository paymentMethodRepository,
 
-            TransactionRepository transactionRepository,
+
             ExpenditureRepository expenditureRepository
     ) {
         return args -> {
@@ -115,30 +116,8 @@ public class DataSeeder {
 
 
 
-            // ===== 9️⃣ Transactions =====
-            Transaction t1 = Transaction.builder()
-                    .amount(new BigDecimal("1000"))
-                    .currency("USD")
-                    .payerName("John Doe")
-                    .transactionDate(LocalDateTime.now())
-                    .branch(branch1)
-                    .revenueHead(tithes)
-                    .processedBy(adminUser)
-                    .paymentMethod(cash)
-                    .build();
 
-            Transaction t2 = Transaction.builder()
-                    .amount(new BigDecimal("500"))
-                    .currency("USD")
-                    .payerName("Jane Smith")
-                    .transactionDate(LocalDateTime.now())
-                    .branch(branch1)
-                    .revenueHead(offerings)
-                    .processedBy(adminUser)
-                    .paymentMethod(ecocash)
-                    .build();
 
-            transactionRepository.saveAll(Set.of(t1, t2));
 
             // ===== 🔟 Expenditures =====
             Expenditure e1 = Expenditure.builder()

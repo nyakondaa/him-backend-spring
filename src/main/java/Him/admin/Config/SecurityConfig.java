@@ -27,6 +27,7 @@ public class SecurityConfig {
                             .requestMatchers("/api/expenditures/**").permitAll()
                             .requestMatchers("/api/expenditureheads/**").permitAll()
                             .requestMatchers("/api/revenueheads/**").permitAll()
+                            .requestMatchers("/api/transactions/**").permitAll()
                             .anyRequest().authenticated()
                     );
 
