@@ -10,6 +10,7 @@ import Him.admin.Repositories.UserRepository;
 import Him.admin.Repositories.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -32,12 +33,7 @@ public class UserService implements UserDetailsService { // Implement UserDetail
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    // ✅ Implement UserDetailsService method
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-    }
+
 
     // Find user by username (returns Optional<User>)
     public Optional<User> findByUsername(String username) {
@@ -172,4 +168,22 @@ public class UserService implements UserDetailsService { // Implement UserDetail
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
         userRepository.delete(user);
     }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        var authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .toList();
+
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .authorities(authorities)
+                .accountLocked(user.isLocked())
+                .build();
+    }
+
 }

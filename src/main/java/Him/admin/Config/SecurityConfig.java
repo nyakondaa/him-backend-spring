@@ -32,9 +32,7 @@ public class SecurityConfig {
         return new JWTFilter(jwtService, userService);
     }
 
-    // Remove PasswordEncoder bean from here - it's now in PasswordConfig
 
-    // Security filter chain
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
