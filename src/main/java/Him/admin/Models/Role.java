@@ -1,5 +1,6 @@
 package Him.admin.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -16,29 +17,26 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class Role {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "role_id")
     private int roleId;
 
-    @NotBlank(message = "Role name is required")
-    @Size(min = 2, max = 50, message = "Role name must be between 2 and 50 characters")
-    @Column(unique = true, nullable = false, length = 50)
+    @NotBlank
+    @Size(min = 2, max = 50)
+    @Column(unique = true, nullable = false)
     private String name;
 
-    @Size(max = 200, message = "Description cannot exceed 200 characters")
+    @Size(max = 200)
     private String description;
 
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "role_permissions",
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "permission_id")
-    )
+    // Permissions can be lazy
+    @ManyToMany(fetch = FetchType.LAZY)
     private Set<Permission> permissions = new HashSet<>();
 
-
-    @ManyToMany(mappedBy = "roles")
+    // Avoid recursion: lazy + JsonIgnore
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<User> users = new HashSet<>();
 }

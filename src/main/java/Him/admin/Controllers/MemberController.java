@@ -60,7 +60,7 @@ public class MemberController {
 
     private MemberResponseDTO convertToResponseDTO(Member member) {
         return new MemberResponseDTO(
-
+                
                 member.getFirstName(),
                 member.getLastName(),
                 member.getBirthDate(),

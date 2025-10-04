@@ -10,6 +10,9 @@ import Him.admin.Repositories.UserRepository;
 import Him.admin.Repositories.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.slf4j.LoggerFactory;
@@ -20,19 +23,27 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService { // Implement UserDetailsService
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final BranchRepository branchRepository;
-    // for hashing passwords
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-    // Find user by username
-    public Optional<User> findByUsername(String username) {
-        return Optional.ofNullable(userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User not found")));
+
+    // ✅ Implement UserDetailsService method
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
+
+    // Find user by username (returns Optional<User>)
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
     // Create a new user
     public User createUser(String username, String rawPassword, String email, String firstName, String lastName, Long branchID,Set<String> roleNames) {
 
@@ -67,12 +78,10 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-
         logger.info("✅ User '{}' created with ID {}", savedUser.getUsername(), savedUser.getId());
 
         return savedUser;
     }
-
 
     // Lock a user
     public void lockUser(Long userId) {
@@ -91,8 +100,6 @@ public class UserService {
         });
     }
 
-    // Check if user has permission
-
     // Increment failed login attempts
     public void incrementFailedLogin(User user) {
         int attempts = user.getFailedLoginAttempts() + 1;
@@ -109,7 +116,6 @@ public class UserService {
         if (optionalUser.isEmpty()) return false;
 
         User user = optionalUser.get();
-
 
         // Check if user is locked
         if (user.isLocked()) return false;
@@ -133,7 +139,7 @@ public class UserService {
         return new HashSet<>(userRepository.findAll());
     }
 
-    // ✅ 2. Update user
+    // ✅ Update user
     public User updateUser(Long userId, UserRequestDTO dto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
@@ -161,12 +167,9 @@ public class UserService {
         return userRepository.save(user);
     }
 
-
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
         userRepository.delete(user);
     }
-
-
 }
