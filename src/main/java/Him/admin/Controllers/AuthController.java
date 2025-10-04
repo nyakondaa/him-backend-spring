@@ -36,7 +36,7 @@ public class AuthController {
 
             System.out.println("✅ Login successful for user: " + userDetails.getUsername());
 
-            // Get user entity to get the ID
+            // Get user entity to get the ID and the Branch
             User user = userService.findByUsername(userDetails.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -52,13 +52,10 @@ public class AuthController {
             String accessToken = jwtService.generateToken(userDetails);
 
             System.out.println(accessToken);
-            System.out.println("role :" + role);
 
             // Get refresh token - pass user ID, not username
             var refreshTokenEntity = refreshTokenService.createRefreshToken(user.getId());
             String refreshToken = refreshTokenEntity.getToken();
-
-            System.out.println("refreshToken :" + refreshToken);
 
             // Create response
             LoginResponse response = new LoginResponse(
@@ -66,9 +63,10 @@ public class AuthController {
                     refreshToken,
                     jwtService.getJwtExpiration() / 1000L, // Convert milliseconds to seconds
                     userDetails.getUsername(),
-                    role
+                    role,
+                    user.getBranch().getBranchCode()
             );
-            System.out.println("response :" + response);
+            System.out.println(response);
 
             return ResponseEntity.ok(response);
 

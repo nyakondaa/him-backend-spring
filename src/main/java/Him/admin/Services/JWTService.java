@@ -1,5 +1,6 @@
 package Him.admin.Services;
 
+import Him.admin.Models.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,6 +57,42 @@ public class JWTService {
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         return createToken(claims, userDetails.getUsername(), jwtExpiration);
+    }
+
+    // ✅ ADD THIS METHOD TO YOUR JWTService
+    public String generateTokenForUser(User user) {
+        Map<String, Object> claims = new HashMap<>();
+
+        // Add all user details to the token
+        claims.put("userId", user.getId());
+        claims.put("username", user.getUsername());
+
+        // ✅ FIX: Handle roles properly (assuming getRoles() returns a collection)
+        String role = "USER";
+        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+            // Get the first role, or extract role names as needed
+            Object firstRole = user.getRoles().iterator().next();
+            if (firstRole instanceof String) {
+                role = (String) firstRole;
+            } else {
+                // If it's a Role entity, you might need to get the role name
+                // role = firstRole.getName(); // Adjust based on your Role class
+                role = firstRole.toString(); // Fallback
+            }
+        }
+        claims.put("role", role);
+
+        // ✅ FIX: Handle branch properly
+        if (user.getBranch() != null) {
+            claims.put("branchCode", user.getBranch().getBranchCode());
+            // You might also want the branch name
+            claims.put("branch", user.getBranch().getBranchName()); // Adjust field name as needed
+        }
+
+        // ✅ Consider adding permissions if available
+
+
+        return createToken(claims, user.getUsername(), jwtExpiration);
     }
 
     public String generateTokenWithClaims(UserDetails userDetails, Map<String, Object> additionalClaims) {
