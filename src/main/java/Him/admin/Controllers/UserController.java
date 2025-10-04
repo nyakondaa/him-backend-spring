@@ -53,6 +53,7 @@ public class UserController {
 
     // 2️⃣ Get all users
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('users:read')")
     public ResponseEntity<Set<UserResponseDTO>> getAllUsers() {
         Set<UserResponseDTO> users = userService.findAll()
                 .stream()
@@ -71,6 +72,7 @@ public class UserController {
 
     // 3️⃣ Get user by ID
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('users:read')")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         return userService.findById(id)
                 .map(user -> new UserResponseDTO(
@@ -88,6 +90,7 @@ public class UserController {
 
     // 4️⃣ Update user
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('users:update')")
     public ResponseEntity<UserResponseDTO> updateUser(
             @PathVariable Long id,
             @Valid @RequestBody UserRequestDTO dto
@@ -107,12 +110,14 @@ public class UserController {
 
     // 5️⃣ Delete user
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('users:delete')")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.ok("User deleted successfully");
     }
 
     // 6️⃣ Lock user
+    @PreAuthorize("hasAnyAuthority('users:create')")
     @PostMapping("/{id}/lock")
     public ResponseEntity<String> lockUser(@PathVariable Long id) {
         userService.lockUser(id);
@@ -120,6 +125,7 @@ public class UserController {
     }
 
     // 7️⃣ Unlock user
+    @PreAuthorize("hasAnyAuthority('users:create')")
     @PostMapping("/{id}/unlock")
     public ResponseEntity<String> unlockUser(@PathVariable Long id) {
         userService.unlockUser(id);

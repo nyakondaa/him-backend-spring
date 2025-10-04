@@ -2,6 +2,8 @@ package Him.admin.Models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -51,4 +53,7 @@ public class Branch {
 
     @OneToMany (mappedBy = "branch", cascade = CascadeType.ALL, orphanRemoval = true) //one branch head can have  many revenueHeads
     private Set<RevenueHeads>  revenueHeads;
+
+    @OneToMany(mappedBy = "branch")
+    private Set<Member> members = new HashSet<>();
 }

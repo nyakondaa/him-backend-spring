@@ -1,5 +1,6 @@
 package Him.admin.DTO.Transactions;
 
+import Him.admin.Models.Member;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -20,8 +21,8 @@ public record TransactionRequestDTO(
         @NotBlank(message = "Currency is required")
         String currency,
 
-        @NotBlank(message = "Payer name is required")
-        String payerName,
+        @NotBlank(message = "member ID is required")
+        Long memberId,
 
         @NotNull(message = "Revenue head ID is required")
         Long revenueHeadId,

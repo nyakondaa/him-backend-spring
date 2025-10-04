@@ -5,10 +5,7 @@ import Him.admin.DTO.Transactions.TransactionResponseDTO;
 import Him.admin.Exceptions.ResourceAlreadyExistsException;
 import Him.admin.Exceptions.ResourceNotFoundException;
 import Him.admin.Models.Transaction;
-import Him.admin.Repositories.BranchRepository;
-import Him.admin.Repositories.RevenueHeadRepository;
-import Him.admin.Repositories.TransactionRepository;
-import Him.admin.Repositories.UserRepository;
+import Him.admin.Repositories.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +24,7 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final BranchRepository branchRepository;
     private final RevenueHeadRepository revenueHeadRepository;
+    private final MemberRepository memberRepository;
 
 
     public Transaction createTransaction(TransactionRequestDTO dto) {
@@ -41,8 +39,8 @@ public class TransactionService {
         var user = userRepository.findById(dto.userId())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", dto.userId().toString()));
 
-        log.info(branch.toString(), revenueHead.toString(), user.toString());
-        System.out.println("wsit");
+        var member = memberRepository.findById(dto.memberId())
+                .orElseThrow(() -> new ResourceNotFoundException("Member", "id", dto.memberId().toString()));
 
         // Generate a unique RRN
         String rrn = generateUniqueRrn();
@@ -52,7 +50,7 @@ public class TransactionService {
                 .amount(dto.amount())
                 .transactionDate(dto.transactionDate())
                 .currency(dto.currency())
-                .payerName(dto.payerName())
+                .member(member)
                 .rrn(rrn)
                 .branch(branch)
                 .revenueHead(revenueHead)

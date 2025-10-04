@@ -32,11 +32,10 @@ public class TransactionsController {
                 transaction.getAmount(),
                 transaction.getTransactionDate(),
                 transaction.getCurrency(),
-                transaction.getPayerName(),
+                transaction.getMember().getFirstName(),
                 transaction.getRevenueHead().getName(),
                 transaction.getBranch().getBranchName(),
                 transaction.getProcessedBy().getUsername()
-
         );
 
         return ResponseEntity.ok().body(responseDTO);

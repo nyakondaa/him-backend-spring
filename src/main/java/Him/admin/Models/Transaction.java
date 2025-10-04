@@ -34,8 +34,9 @@ public class Transaction {
     @NotBlank
     private String currency; // ZIG, USD, etc.
 
-    @NotBlank
-    private String payerName;
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @ManyToOne
     @JoinColumn(name = "revenue_head_id")

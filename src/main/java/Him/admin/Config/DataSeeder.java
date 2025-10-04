@@ -68,10 +68,18 @@ public class DataSeeder {
             Permission createUsers = Permission.builder().module("users").action("create").build();
             Permission updateUsers = Permission.builder().module("users").action("update").build();
             Permission deleteUsers = Permission.builder().module("users").action("delete").build();
-            Permission readTransactions = Permission.builder().module("transactions").action("read").build();
-            Permission createTransactions = Permission.builder().module("transactions").action("create").build();
 
-            permissionRepository.saveAll(Set.of(readUsers, createUsers, updateUsers, deleteUsers, readTransactions, createTransactions));
+            Permission readTransactions = Permission.builder().module("transactions").action("read").build();
+            Permission updateTransaction = Permission.builder().module("transactions").action("update").build();
+            Permission createTransactions = Permission.builder().module("transactions").action("create").build();
+            Permission deleteTransaction = Permission.builder().module("transactions").action("delete").build();
+
+
+
+            permissionRepository.saveAll(Set.of(readUsers, createUsers, updateUsers, deleteUsers,
+                    readTransactions, createTransactions, updateTransaction, deleteTransaction
+
+            ));
 
             // ====================================================================
             // ===== 3️⃣ Create Roles (Group Permissions) =====
@@ -163,6 +171,11 @@ public class DataSeeder {
                     .build();
 
             expenditureRepository.saveAll(Set.of(e1, e2));
+
+
+            //=================================================================
+            // default payment methods
+
 
             System.out.println("✅ Database seeded: Branches, Permissions, Roles, Users (Hashed Passwords!), RevenueHeads, ExpenditureHeads, PaymentMethods, Expenditures.");
         };
