@@ -32,7 +32,13 @@ public class Role {
     private String description;
 
     // Permissions can be lazy
-    @ManyToMany(fetch = FetchType.LAZY)
+    // Permissions can be lazy
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "roles_permission", // Explicitly set the name of the join table
+            joinColumns = @JoinColumn(name = "role_id"), // Column in the join table linking to THIS (Role) entity
+            inverseJoinColumns = @JoinColumn(name = "permission_id") // Column in the join table linking to the OTHER (Permission) entity
+    )
     private Set<Permission> permissions = new HashSet<>();
 
     // Avoid recursion: lazy + JsonIgnore

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/expenditureheads")
+@RequestMapping("/api/expenditure-heads")
 public class ExpenditureHeadsController {
     private final ExpenditureHeadsService expenditureHeadsService;
 

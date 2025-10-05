@@ -15,6 +15,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set; // Import Set for permissions
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -36,35 +38,41 @@ public class AuthController {
 
             System.out.println("✅ Login successful for user: " + userDetails.getUsername());
 
-            // Get user entity to get the ID and the Branch
+            // Get user entity to get the ID and the Branch/Permissions
             User user = userService.findByUsername(userDetails.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             System.out.println(user);
 
-            // Get the first authority as role
+
+            Set<String> permissions = jwtService.getPermissionsFromUser(user); // ⬅️ ASSUMING THIS METHOD IS NOW PUBLIC
+
+            // 2. Get the role name
             String role = auth.getAuthorities().stream()
                     .findFirst()
-                    .map(authority -> authority.getAuthority())
+                    .map(authority -> authority.getAuthority().replace("ROLE_", "")) // Remove ROLE_ prefix
                     .orElse("USER");
 
-            // Generate tokens
-            String accessToken = jwtService.generateToken(userDetails);
+            // 3. Generate the rich access token
+            String accessToken = jwtService.generateTokenForUser(user);
 
             System.out.println(accessToken);
 
-            // Get refresh token - pass user ID, not username
+            // 4. Get refresh token
             var refreshTokenEntity = refreshTokenService.createRefreshToken(user.getId());
             String refreshToken = refreshTokenEntity.getToken();
 
-            // Create response
+            // 5. Create response
             LoginResponse response = new LoginResponse(
                     accessToken,
                     refreshToken,
                     jwtService.getJwtExpiration() / 1000L, // Convert milliseconds to seconds
+                    user.getFirstName(),
+                    user.getLastName(),
                     userDetails.getUsername(),
                     role,
-                    user.getBranch().getBranchCode()
+                    user.getBranch() != null ? user.getBranch().getBranchCode() : null, // Branch Code String
+                    permissions // ⬅️ PASS THE PERMISSIONS SET HERE
             );
             System.out.println(response);
 

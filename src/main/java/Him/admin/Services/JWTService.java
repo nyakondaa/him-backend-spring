@@ -1,6 +1,7 @@
 package Him.admin.Services;
 
 import Him.admin.Models.User;
+import Him.admin.Models.Permission; // Import Permission
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,19 +12,22 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set; // Import Set
 import java.util.function.Function;
+import java.util.stream.Collectors; // Import Collectors
 
 @Service
 public class JWTService {
 
-    @Value("${jwt.secret:mySecretKeymySecretKeymySecretKeymySecretKeymySecretKey}")
+    @Value("${security.jwt.secret-key}")
     private String secret;
 
-    @Value("${jwt.expiration:900000}") // 15 minutes default
+    @Value("${security.jwt.expiration-time}")
     private Long jwtExpiration;
 
-    @Value("${jwt.refresh.expiration:604800000}") // 7 days default
+    @Value("${security.jwt.refresh-expiration-time}")
     private Long refreshExpiration;
+
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
@@ -59,41 +63,58 @@ public class JWTService {
         return createToken(claims, userDetails.getUsername(), jwtExpiration);
     }
 
-    // ✅ ADD THIS METHOD TO YOUR JWTService
+    /**
+     * Generates a JWT with rich claims, including userId, role, branch details, and permissions.
+     */
     public String generateTokenForUser(User user) {
         Map<String, Object> claims = new HashMap<>();
 
-        // Add all user details to the token
+        // Add core user details
         claims.put("userId", user.getId());
         claims.put("username", user.getUsername());
 
-        // ✅ FIX: Handle roles properly (assuming getRoles() returns a collection)
-        String role = "USER";
-        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
-            // Get the first role, or extract role names as needed
-            Object firstRole = user.getRoles().iterator().next();
-            if (firstRole instanceof String) {
-                role = (String) firstRole;
-            } else {
-                // If it's a Role entity, you might need to get the role name
-                // role = firstRole.getName(); // Adjust based on your Role class
-                role = firstRole.toString(); // Fallback
-            }
-        }
-        claims.put("role", role);
+        // 1. Get and add Role
+        String roleName = user.getRoles().stream()
+                .findFirst() // Assuming a user has one primary role for this claim
+                .map(role -> role.getName())
+                .orElse("USER");
+        claims.put("role", roleName);
 
-        // ✅ FIX: Handle branch properly
+        // 2. Get and add Branch details
         if (user.getBranch() != null) {
+            // Adjust the getter methods (.getCode(), .getName()) to match your Branch entity
             claims.put("branchCode", user.getBranch().getBranchCode());
-            // You might also want the branch name
-            claims.put("branch", user.getBranch().getBranchName()); // Adjust field name as needed
+            claims.put("branch", user.getBranch().getBranchName());
         }
 
-        // ✅ Consider adding permissions if available
-
+        // 3. Get and add Permissions
+        Set<String> permissions = getPermissionsFromUser(user);
+        claims.put("permissions", permissions);
 
         return createToken(claims, user.getUsername(), jwtExpiration);
     }
+
+    /**
+     * Extracts all unique permission strings ("module:action") from the user's roles.
+     * NOTE: Relies on User.roles being EAGER, and for this to work,
+     * the permissions linked to the roles must also be FETCHED either by EAGER or a custom query.
+     */
+    public Set<String> getPermissionsFromUser(User user) {
+        if (user.getRoles() == null) {
+            return Set.of();
+        }
+
+        return user.getRoles().stream()
+                .flatMap(role -> {
+                    // This stream relies on role.getPermissions() being initialized (not LAZY-loaded)
+                    return role.getPermissions().stream();
+                })
+                // Use Permission.toString() which returns "module:action"
+                .map(Permission::toString)
+                .collect(Collectors.toSet());
+    }
+
+    // --- Existing methods kept for completeness ---
 
     public String generateTokenWithClaims(UserDetails userDetails, Map<String, Object> additionalClaims) {
         Map<String, Object> claims = new HashMap<>();

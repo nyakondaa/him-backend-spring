@@ -10,9 +10,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,7 +29,7 @@ public class UserController {
 
     // 1️⃣ Create user
     @PostMapping
-    @PreAuthorize("hasAuthority('users:create')")
+    //@PreAuthorize("hasAuthority('users:create')")
     public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserRequestDTO dto) {
         User user = userService.createUser(
                 dto.getUsername(),
@@ -53,7 +57,7 @@ public class UserController {
 
     // 2️⃣ Get all users
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('users:read')")
+   // @PreAuthorize("hasAnyAuthority('users:read')")
     public ResponseEntity<Set<UserResponseDTO>> getAllUsers() {
         Set<UserResponseDTO> users = userService.findAll()
                 .stream()
@@ -72,7 +76,7 @@ public class UserController {
 
     // 3️⃣ Get user by ID
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('users:read')")
+    //@PreAuthorize("hasAnyAuthority('users:read')")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         return userService.findById(id)
                 .map(user -> new UserResponseDTO(
@@ -90,7 +94,7 @@ public class UserController {
 
     // 4️⃣ Update user
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('users:update')")
+    //@PreAuthorize("hasAnyAuthority('users:update')")
     public ResponseEntity<UserResponseDTO> updateUser(
             @PathVariable Long id,
             @Valid @RequestBody UserRequestDTO dto
@@ -130,6 +134,30 @@ public class UserController {
     public ResponseEntity<String> unlockUser(@PathVariable Long id) {
         userService.unlockUser(id);
         return ResponseEntity.ok("User unlocked");
+    }
+
+    // Add this to your UserController
+
+
+    @GetMapping("/debug/authorities")
+    @PreAuthorize("isAuthenticated()") // Add this line
+    public ResponseEntity<?> debugAuthorities() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        System.out.println("=== DEBUG CURRENT USER AUTHORITIES ===");
+        System.out.println("User: " + auth.getName());
+        System.out.println("Authorities: " + auth.getAuthorities());
+        System.out.println("Is Authenticated: " + auth.isAuthenticated());
+        System.out.println("Principal: " + auth.getPrincipal());
+        System.out.println("===============================");
+
+        return ResponseEntity.ok(Map.of(
+                "user", auth.getName(),
+                "authenticated", auth.isAuthenticated(),
+                "authorities", auth.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toList())
+        ));
     }
 
     

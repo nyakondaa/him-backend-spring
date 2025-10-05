@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -57,17 +59,27 @@ public class User implements UserDetails {
     )
     private Set<Role> roles;
 
-    // -----------------------------
-    // Simplified authorities
-    // -----------------------------
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (roles == null) return Set.of();
-        // Only use role names as authorities (ROLE_X)
-        return roles.stream()
-                .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role.getName()))
-                .collect(Collectors.toSet());
+
+        Set<GrantedAuthority> authorities = new HashSet<>();
+
+        // Add roles as ROLE_ authorities (Spring Security convention)
+        authorities.addAll(roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+                .collect(Collectors.toSet()));
+
+        // Add permissions as module:action authorities
+        authorities.addAll(roles.stream()
+                .flatMap(role -> role.getPermissions().stream())
+                .map(permission -> new SimpleGrantedAuthority(
+                        permission.getModule() + ":" + permission.getAction()
+                ))
+                .collect(Collectors.toSet()));
+
+        return authorities;
     }
 
     @Override
