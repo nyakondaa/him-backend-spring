@@ -3,7 +3,7 @@ package Him.admin.DTO.MembersDTO;
 import java.time.LocalDate;
 
 public record MemberResponseDTO(
-
+        Long id,
         String firstName,
         String lastName,
         LocalDate birthDate,

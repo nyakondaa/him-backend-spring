@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -115,9 +116,9 @@ public class UserController {
     // 5️⃣ Delete user
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('users:delete')")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        return ResponseEntity.ok("User deleted successfully");
+        return ResponseEntity.ok(Collections.singletonMap("message", "User deleted successfully"));
     }
 
     // 6️⃣ Lock user

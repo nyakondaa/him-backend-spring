@@ -2,6 +2,7 @@ package Him.admin.Controllers;
 
 import Him.admin.DTO.LoginDTO.LoginDTORequest;
 import Him.admin.DTO.LoginDTO.LoginResponse;
+import Him.admin.Models.Role;
 import Him.admin.Models.User;
 import Him.admin.Services.JWTService;
 import Him.admin.Services.RefreshTokenService;
@@ -16,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set; // Import Set for permissions
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -26,7 +28,6 @@ public class AuthController {
     private final JWTService jwtService;
     private final RefreshTokenService refreshTokenService;
     private final UserService userService;
-
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginDTORequest dto) {
         try {
@@ -42,46 +43,57 @@ public class AuthController {
             User user = userService.findByUsername(userDetails.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            System.out.println(user);
+            System.out.println("User roles from entity: " +
+                    user.getRoles().stream().map(Role::getName).collect(Collectors.toList()));
 
+            Set<String> permissions = jwtService.getPermissionsFromUser(user);
 
-            Set<String> permissions = jwtService.getPermissionsFromUser(user); // ⬅️ ASSUMING THIS METHOD IS NOW PUBLIC
-
-            // 2. Get the role name
-            String role = auth.getAuthorities().stream()
+            // FIX: Get the role name from the User entity, not from authorities
+            String role = user.getRoles().stream()
                     .findFirst()
-                    .map(authority -> authority.getAuthority().replace("ROLE_", "")) // Remove ROLE_ prefix
+                    .map(Role::getName) // Get the actual role name from the User entity
                     .orElse("USER");
 
-            // 3. Generate the rich access token
+            // ALTERNATIVE FIX: Filter authorities to only get roles
+            // String role = auth.getAuthorities().stream()
+            //         .map(GrantedAuthority::getAuthority)
+            //         .filter(authority -> authority.startsWith("ROLE_"))
+            //         .findFirst()
+            //         .map(authority -> authority.replace("ROLE_", ""))
+            //         .orElse("USER");
+
+            System.out.println("Selected role for response: " + role);
+
+            // Generate the rich access token
             String accessToken = jwtService.generateTokenForUser(user);
 
-            System.out.println(accessToken);
-
-            // 4. Get refresh token
+            // Get refresh token
             var refreshTokenEntity = refreshTokenService.createRefreshToken(user.getId());
             String refreshToken = refreshTokenEntity.getToken();
 
-            // 5. Create response
+            // Create response
             LoginResponse response = new LoginResponse(
                     accessToken,
                     refreshToken,
-                    jwtService.getJwtExpiration() / 1000L, // Convert milliseconds to seconds
+                    jwtService.getJwtExpiration() / 1000L,
                     user.getFirstName(),
                     user.getLastName(),
                     userDetails.getUsername(),
-                    role,
-                    user.getBranch() != null ? user.getBranch().getBranchCode() : null, // Branch Code String
-                    permissions // ⬅️ PASS THE PERMISSIONS SET HERE
+                    role, // This should now be "ADMIN"
+                    user.getBranch() != null ? user.getBranch().getBranchCode() : null,
+                    permissions
             );
-            System.out.println(response);
+            System.out.println("Final response - Role: " + response.role());
+            System.out.println("Final response - Permissions: " + response.permissions());
 
             return ResponseEntity.ok(response);
-
 
         } catch (Exception e) {
             System.err.println("❌ Login failed: " + e.getMessage());
             throw new RuntimeException("Login failed: " + e.getMessage());
         }
     }
+
+
+
 }
