@@ -43,6 +43,11 @@ public class Transaction {
     private RevenueHeads revenueHead;
 
     @ManyToOne
+    @JoinColumn(name = "expenditure_head_id")
+    private ExpenditureHead expenditureHead;
+
+
+    @ManyToOne
     @JoinColumn(name = "branch_id")
     private Branch branch;
 
@@ -53,4 +58,8 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "payment_method_id")
     private PaymentMethod paymentMethod;
+
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
 }

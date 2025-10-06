@@ -26,7 +26,7 @@ public record ExpenditureHeadRequestDTO(
  String description,
 
 @NotNull
-Long bracnhID
+Long branchID
 
 ) {
 }

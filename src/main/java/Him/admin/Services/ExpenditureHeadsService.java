@@ -32,14 +32,34 @@ public class ExpenditureHeadsService {
 
     }
 
-    public ExpenditureHead updateExpenditureHead(String code, String name, String description, Long branchID) {
-        ExpenditureHead expenditureHead =  expenditureHeadsRepository.findById(branchID).orElseThrow(EntityNotFoundException::new);
-        expenditureHead.setCode(code);
-        expenditureHead.setName(name);
-        expenditureHead.setDescription(description);
-        expenditureHeadsRepository.save(expenditureHead);
+    public ExpenditureHead updateExpenditureHead(Long expenditureHeadId, String name, String code, String description, Long branchID) {
+        // Find by expenditure head ID, not branch ID!
+        ExpenditureHead expenditureHead = expenditureHeadsRepository.findById(expenditureHeadId)
+                .orElseThrow(() -> new EntityNotFoundException("Expenditure head not found with id: " + expenditureHeadId));
 
-        return expenditureHead;
+        // Check if branch exists
+        Branch branch = branchRepository.findById(branchID)
+                .orElseThrow(() -> new EntityNotFoundException("Branch not found with id: " + branchID));
+
+        // Check for duplicate names (if name is being changed)
+        if (!expenditureHead.getName().equals(name) &&
+                expenditureHeadsRepository.existsByName(name)) {
+            throw new IllegalArgumentException("Expenditure head with name '" + name + "' already exists");
+        }
+
+        // Check for duplicate codes (if code is being changed)
+        if (!expenditureHead.getCode().equals(code) &&
+                expenditureHeadsRepository.existsByCode(code)) {
+            throw new IllegalArgumentException("Expenditure head with code '" + code + "' already exists");
+        }
+
+        // Update the fields
+        expenditureHead.setName(name);
+        expenditureHead.setCode(code);
+        expenditureHead.setDescription(description);
+        expenditureHead.setBranch(branch);
+
+        return expenditureHeadsRepository.save(expenditureHead);
     }
 
     public List<ExpenditureHead> getAllExpenditureHeads() {

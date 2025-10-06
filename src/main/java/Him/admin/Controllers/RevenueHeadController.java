@@ -13,10 +13,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Controller
-@RequestMapping("/api/revenueheads")
+@RestController
+@RequestMapping("/api/revenue-heads")
 public class RevenueHeadController {
     private final RevenueHeadRepository revenueHeadRepository;
     private final RevenueHeadService revenueHeadService;
@@ -25,6 +26,7 @@ public class RevenueHeadController {
     public ResponseEntity<RevenueHeadResponseDTO> createRevenueHead(@Valid @RequestBody RevenueHeadRequestDTO dto){
         RevenueHeads revenueHeads = revenueHeadService.createRevenueHeads(dto.name(), dto.description(), dto.code(), dto.branchID());
         RevenueHeadResponseDTO responseDTO = new RevenueHeadResponseDTO(
+                revenueHeads.getId(),
                 revenueHeads.getName(),
                 revenueHeads.getCode(),
                 revenueHeads.getDescription()
@@ -35,9 +37,21 @@ public class RevenueHeadController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RevenueHeads>> getAllRevenueHeads() {
+    public ResponseEntity<List<RevenueHeadResponseDTO>> getAllRevenueHeads() {
         List<RevenueHeads> revenueHeads = revenueHeadService.getAllRevenueHeads();
-        return ResponseEntity.ok(revenueHeads);
+
+        // Convert entities to DTOs to avoid circular references
+        List<RevenueHeadResponseDTO> responseDTOs = revenueHeads.stream()
+                .map(head -> new RevenueHeadResponseDTO(
+                        head.getId(),
+                        head.getName(),
+                        head.getCode(),
+                        head.getDescription()
+
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(responseDTOs);
     }
 
    //update revenue-id
@@ -47,6 +61,7 @@ public class RevenueHeadController {
             @Valid @RequestBody RevenueHeadRequestDTO dto, @PathVariable Long id){
         RevenueHeads revenueHeads =  revenueHeadService.updateRevenueHeads(dto.name(), dto.description(), dto.code(), id);
         RevenueHeadResponseDTO responseDTO = new RevenueHeadResponseDTO(
+                revenueHeads.getId(),
                 revenueHeads.getName(),
                 revenueHeads.getCode(),
                 revenueHeads.getDescription()
@@ -56,9 +71,9 @@ public class RevenueHeadController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteRevenueHead(@PathVariable Long id) {
         revenueHeadService.deleteRevenueHead(id);
-        return ResponseEntity.ok("Revenue head deleted successfully");
+        return ResponseEntity.noContent().build(); // Returns 204 with no body
     }
 
 }
