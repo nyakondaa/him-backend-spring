@@ -61,6 +61,7 @@ public class MemberController {
     private MemberResponseDTO convertToResponseDTO(Member member) {
         return new MemberResponseDTO(
                 member.getId(),
+
                 
                 member.getFirstName(),
                 member.getLastName(),
@@ -68,7 +69,8 @@ public class MemberController {
                 member.getGender(),
                 member.getAddress(),
                 member.getPhone(),
-                member.getEmail()
+                member.getEmail(),
+                member.getBranch().getId()
 
 
         );

@@ -10,7 +10,8 @@ public record MemberResponseDTO(
         String gender,
         String address,
         String phone,
-        String email
+        String email,
+        Long branchID
 
 ) {
 }

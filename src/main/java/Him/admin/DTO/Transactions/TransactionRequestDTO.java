@@ -20,8 +20,10 @@ public record TransactionRequestDTO(
 
         @NotBlank(message = "Currency is required")
         String currency,
+        @NotNull(message = "Payment method ID is required")
+        Long paymentMethodId, // <--- NEW REQUIRED FIELD
 
-        @NotBlank(message = "member ID is required")
+        @NotNull(message = "member ID is required")
         Long memberId,
 
         @NotNull(message = "Revenue head ID is required")

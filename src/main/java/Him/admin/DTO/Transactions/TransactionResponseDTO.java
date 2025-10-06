@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record TransactionResponseDTO(
-
+        Long id,
         String rrn,
         BigDecimal amount,
         LocalDateTime transactionDate,
@@ -12,8 +12,10 @@ public record TransactionResponseDTO(
         String payerName,
         String revenueHeadName,
         String branchName,
-        String processedBy
-
+        String branchCode,
+        Long branchId,
+        String processedBy,
+        Long paymentMethodID
 
 ) {
 }
