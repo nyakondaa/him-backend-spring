@@ -8,7 +8,7 @@ import Him.admin.Models.Project;
 import Him.admin.Models.Project.ProjectStatus;
 
 import Him.admin.Repositories.BranchRepository;
-import Him.admin.Repository.ProjectRepository;
+import Him.admin.Repositories.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

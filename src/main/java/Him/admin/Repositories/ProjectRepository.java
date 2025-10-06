@@ -1,4 +1,4 @@
-package Him.admin.Repository;
+package Him.admin.Repositories;
 
 import Him.admin.Models.Project;
 import Him.admin.Models.Project.ProjectStatus;
