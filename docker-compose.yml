@@ -1,34 +1,24 @@
 version: '3.8'
 
 services:
-  db:
-    image: mysql:8
-    container_name: him-db
-    environment:
-      MYSQL_DATABASE: himdb
-      MYSQL_ROOT_PASSWORD: 491Jacaranda!
-    ports:
-      - "3306:3306"
-    volumes:
-      - db-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   backend:
     build: .
     container_name: him-backend
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/himdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: 491Jacaranda!
-    depends_on:
-      db:
-        condition: service_healthy
+      # CRITICAL FIX: You MUST replace these placeholders with the actual connection details
+      # provided by Railway for your MySQL service.
+      # Look for the 'Variables' or 'Settings' tab on your Railway DB service.
+      # The hostname is typically a long URL (e.g., shinkansen.proxy.rwy.net).
+      SPRING_DATASOURCE_URL: jdbc:mysql://YOUR_RAILWAY_HOST:3306/himdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: YOUR_RAILWAY_USERNAME
+      SPRING_DATASOURCE_PASSWORD: YOUR_RAILWAY_PASSWORD
 
-volumes:
-  db-data:
+    # We remove the depends_on block and the entrypoint sleep
+    # because the DB is managed externally and doesn't need a local health check.
+    # We keep the simple ENTRYPOINT defined in the Dockerfile.
+
+# Remove the volumes block since we are no longer managing a local database volume
+# volumes:
+#   db-data:
