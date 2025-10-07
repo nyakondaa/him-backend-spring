@@ -7,13 +7,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # CRITICAL FIX: You MUST replace these placeholders with the actual connection details
-      # provided by Railway for your MySQL service.
-      # Look for the 'Variables' or 'Settings' tab on your Railway DB service.
-      # The hostname is typically a long URL (e.g., shinkansen.proxy.rwy.net).
-      SPRING_DATASOURCE_URL: jdbc:mysql://YOUR_RAILWAY_HOST:3306/himdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: YOUR_RAILWAY_USERNAME
-      SPRING_DATASOURCE_PASSWORD: YOUR_RAILWAY_PASSWORD
+      # CRITICAL FIX: The application.properties file is looking for variables
+      # starting with 'MYSQL'. We must define these variables here using
+      # your actual Railway connection details.
+      MYSQLHOST: mysql.railway.internal # e.g., shinkansen.proxy.rwy.net (get this from Railway)
+      MYSQLPORT: 3306
+      MYSQLDATABASE: railway # Ensure this matches your database name on Railway
+      MYSQLUSER: railway
+      MYSQLPASSWORD: yIrccbowFzJbOVYIeEwekVKjFGLbibgs
 
     # We remove the depends_on block and the entrypoint sleep
     # because the DB is managed externally and doesn't need a local health check.
