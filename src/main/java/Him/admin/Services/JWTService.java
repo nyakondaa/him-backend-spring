@@ -19,13 +19,13 @@ import java.util.stream.Collectors; // Import Collectors
 @Service
 public class JWTService {
 
-    @Value("${security.jwt.secret-key}")
+    @Value("${jwt.secret-key}")
     private String secret;
 
-    @Value("${security.jwt.expiration-time}")
+    @Value("${jwt.expiration-time}")
     private Long jwtExpiration;
 
-    @Value("${security.jwt.refresh-expiration-time}")
+    @Value("${jwt.refresh-expiration-time}")
     private Long refreshExpiration;
 
 
