@@ -13,7 +13,7 @@ services:
       MYSQLHOST: mysql.railway.internal # e.g., shinkansen.proxy.rwy.net (get this from Railway)
       MYSQLPORT: 3306
       MYSQLDATABASE: railway # Ensure this matches your database name on Railway
-      MYSQLUSER: railway
+      MYSQLUSER: root
       MYSQLPASSWORD: yIrccbowFzJbOVYIeEwekVKjFGLbibgs
 
     # We remove the depends_on block and the entrypoint sleep
