@@ -1,8 +1,11 @@
 package Him.admin.Controllers;
 
+import Him.admin.DTO.Users.UpdateUserDTO;
 import Him.admin.DTO.Users.UserRequestDTO;
 import Him.admin.DTO.Users.LoginRequestDTO;
 import Him.admin.DTO.Users.UserResponseDTO;
+import Him.admin.Exceptions.AuthServiceException;
+import Him.admin.Exceptions.UserNotFoundException;
 import Him.admin.Models.Role;
 import Him.admin.Models.User;
 import Him.admin.Services.UserService;
@@ -10,9 +13,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -95,23 +100,44 @@ public class UserController {
 
     // 4️⃣ Update user
     @PutMapping("/{id}")
-    //@PreAuthorize("hasAnyAuthority('users:update')")
+//@PreAuthorize("hasAnyAuthority('users:update')")
     public ResponseEntity<UserResponseDTO> updateUser(
             @PathVariable Long id,
-            @Valid @RequestBody UserRequestDTO dto
+            @Valid @RequestBody UpdateUserDTO dto
     ) {
-        User updated = userService.updateUser(id, dto);
-        UserResponseDTO response = new UserResponseDTO(
-                updated.getId(),
-                updated.getUsername(),
-                updated.getEmail(),
-                updated.getFirstName(),
-                updated.getLastName(),
-                updated.getBranch() != null ? updated.getBranch().getBranchName() : null,
-                updated.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
-        );
-        return ResponseEntity.ok(response);
+        try {
+            User updated = userService.updateUser(id, dto);
+
+            // Refresh authentication if username changed
+            if (dto.username() != null && !dto.username().isBlank()) {
+                UserDetails updatedUserDetails = userService.loadUserByUsername(updated.getUsername());
+                UsernamePasswordAuthenticationToken newAuth = new UsernamePasswordAuthenticationToken(
+                        updatedUserDetails,
+                        null,
+                        updatedUserDetails.getAuthorities()
+                );
+                SecurityContextHolder.getContext().setAuthentication(newAuth);
+            }
+
+            UserResponseDTO response = new UserResponseDTO(
+                    updated.getId(),
+                    updated.getUsername(),
+                    updated.getEmail(),
+                    updated.getFirstName(),
+                    updated.getLastName(),
+                    updated.getBranch() != null ? updated.getBranch().getBranchName() : null,
+                    updated.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (UserNotFoundException ex) {
+            throw ex; // handled by your global exception handler
+        } catch (Exception ex) {
+            throw new AuthServiceException("Failed to update user: " + ex.getMessage());
+        }
     }
+
 
     // 5️⃣ Delete user
     @DeleteMapping("/{id}")

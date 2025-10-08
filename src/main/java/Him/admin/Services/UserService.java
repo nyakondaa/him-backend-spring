@@ -1,4 +1,5 @@
 package Him.admin.Services;
+import Him.admin.DTO.Users.UpdateUserDTO;
 import Him.admin.DTO.Users.UserRequestDTO;
 import Him.admin.Exceptions.ResourceAlreadyExistsException;
 import Him.admin.Exceptions.ResourceNotFoundException;
@@ -136,26 +137,26 @@ public class UserService implements UserDetailsService { // Implement UserDetail
     }
 
     // ✅ Update user
-    public User updateUser(Long userId, UserRequestDTO dto) {
+    public User updateUser(Long userId, UpdateUserDTO dto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
         // Update basic fields
-        user.setUsername(dto.getUsername() != null ? dto.getUsername() : user.getUsername());
-        user.setEmail(dto.getEmail() != null ? dto.getEmail() : user.getEmail());
-        user.setFirstName(dto.getFirstName() != null ? dto.getFirstName() : user.getFirstName());
-        user.setLastName(dto.getLastName() != null ? dto.getLastName() : user.getLastName());
+        user.setUsername(dto.username() != null ? dto.username() : user.getUsername());
+        user.setEmail(dto.email() != null ? dto.email() : user.getEmail());
+        user.setFirstName(dto.firstName() != null ? dto.firstName() : user.getFirstName());
+        user.setLastName(dto.lastName() != null ? dto.lastName() : user.getLastName());
 
         // Update password if provided
-        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        if (dto.password() != null && !dto.password().isBlank()) {
+            user.setPassword(passwordEncoder.encode(dto.password()));
         }
 
         // Update roles if provided
-        if (dto.getRoles() != null && !dto.getRoles().isEmpty()) {
+        if (dto.roles() != null && !dto.roles().isEmpty()) {
             Set<Role> roles = roleRepository.findAll()
                     .stream()
-                    .filter(r -> dto.getRoles().contains(r.getName()))
+                    .filter(r -> dto.roles().contains(r.getName()))
                     .collect(Collectors.toSet());
             user.setRoles(roles);
         }

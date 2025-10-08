@@ -2,6 +2,9 @@ package Him.admin.Controllers;
 
 import Him.admin.DTO.LoginDTO.LoginDTORequest;
 import Him.admin.DTO.LoginDTO.LoginResponse;
+import Him.admin.Exceptions.AuthServiceException;
+import Him.admin.Exceptions.InvalidCredentialsException;
+import Him.admin.Exceptions.UserNotFoundException;
 import Him.admin.Models.Role;
 import Him.admin.Models.User;
 import Him.admin.Services.JWTService;
@@ -11,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,72 +32,60 @@ public class AuthController {
     private final JWTService jwtService;
     private final RefreshTokenService refreshTokenService;
     private final UserService userService;
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginDTORequest dto) {
-        try {
-            Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(dto.username(), dto.password())
-            );
 
-            UserDetails userDetails = (UserDetails) auth.getPrincipal();
 
-            System.out.println("✅ Login successful for user: " + userDetails.getUsername());
+        @PostMapping("/login")
+        public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginDTORequest dto) {
+            try {
+                // Authenticate user
+                Authentication auth = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(dto.username(), dto.password())
+                );
 
-            // Get user entity to get the ID and the Branch/Permissions
-            User user = userService.findByUsername(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                UserDetails userDetails = (UserDetails) auth.getPrincipal();
 
-            System.out.println("User roles from entity: " +
-                    user.getRoles().stream().map(Role::getName).collect(Collectors.toList()));
+                // Load user entity
+                User user = userService.findByUsername(userDetails.getUsername())
+                        .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-            Set<String> permissions = jwtService.getPermissionsFromUser(user);
+                // Get role
+                String role = user.getRoles().stream()
+                        .findFirst()
+                        .map(Role::getName)
+                        .orElse("USER");
 
-            // FIX: Get the role name from the User entity, not from authorities
-            String role = user.getRoles().stream()
-                    .findFirst()
-                    .map(Role::getName) // Get the actual role name from the User entity
-                    .orElse("USER");
+                // Get permissions
+                Set<String> permissions = jwtService.getPermissionsFromUser(user);
 
-            // ALTERNATIVE FIX: Filter authorities to only get roles
-            // String role = auth.getAuthorities().stream()
-            //         .map(GrantedAuthority::getAuthority)
-            //         .filter(authority -> authority.startsWith("ROLE_"))
-            //         .findFirst()
-            //         .map(authority -> authority.replace("ROLE_", ""))
-            //         .orElse("USER");
+                // Generate tokens
+                String accessToken = jwtService.generateTokenForUser(user);
+                String refreshToken = refreshTokenService.createRefreshToken(user.getId()).getToken();
 
-            System.out.println("Selected role for response: " + role);
+                // Build response
+                LoginResponse response = new LoginResponse(
+                        accessToken,
+                        refreshToken,
+                        jwtService.getJwtExpiration() / 1000L,
+                        user.getFirstName(),
+                        user.getLastName(),
+                        userDetails.getUsername(),
+                        role,
+                        user.getBranch() != null ? user.getBranch().getBranchCode() : null,
+                        permissions
+                );
 
-            // Generate the rich access token
-            String accessToken = jwtService.generateTokenForUser(user);
+                return ResponseEntity.ok(response);
 
-            // Get refresh token
-            var refreshTokenEntity = refreshTokenService.createRefreshToken(user.getId());
-            String refreshToken = refreshTokenEntity.getToken();
-
-            // Create response
-            LoginResponse response = new LoginResponse(
-                    accessToken,
-                    refreshToken,
-                    jwtService.getJwtExpiration() / 1000L,
-                    user.getFirstName(),
-                    user.getLastName(),
-                    userDetails.getUsername(),
-                    role, // This should now be "ADMIN"
-                    user.getBranch() != null ? user.getBranch().getBranchCode() : null,
-                    permissions
-            );
-            System.out.println("Final response - Role: " + response.role());
-            System.out.println("Final response - Permissions: " + response.permissions());
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            System.err.println("❌ Login failed: " + e.getMessage());
-            throw new RuntimeException("Login failed: " + e.getMessage());
+            } catch (BadCredentialsException ex) {
+                throw new InvalidCredentialsException("Invalid username or password");
+            } catch (UserNotFoundException ex) {
+                throw ex; // already meaningful
+            } catch (Exception ex) {
+                throw new AuthServiceException("Login failed: " + ex.getMessage());
+            }
         }
     }
 
 
 
-}
+
